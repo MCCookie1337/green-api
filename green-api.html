@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GREEN-API Вызовы</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 20px;
+            border: 1px solid #ccc;
+        }
+        h1 {
+            color: #007BFF;
+        }
+        input, button {
+            display: block;
+            margin: 10px 0;
+            width: 300px;
+            padding: 10px;
+        }
+        button {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        textarea {
+            width: 600px;
+            height: 200px;
+            resize: none;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div>
+    <input type="text" id="idInstance" placeholder="Введите idInstance" />
+    <input type="text" id="apiTokenInstance" placeholder="Введите apiTokenInstance" />
+</div>
+
+<div>
+    <button onclick="getSettings()">getSettings</button>
+    <button onclick="getStateInstance()">getStateInstance</button>
+</div>
+
+<div>
+    <input type="text" id="chatIdMessage" placeholder="Введите chatId" />
+    <input type="text" id="message" placeholder="Введите сообщение" />
+    <button onclick="sendMessage()">sendMessage</button>
+</div>
+
+<div>
+    <input type="text" id="chatIdFile" placeholder="Введите chatId" />
+    <input type="text" id="fileUrl" placeholder="Введите URL файла" />
+
+    <button onclick="sendFileByUrl()">sendFileByUrl</button>
+</div>
+
+<textarea id="responseOutput" readonly></textarea>
+
+<script>
+    const apiUrl = 'https://1103.api.green-api.com';
+
+    function formatChatId(chatId) {
+        if (!chatId.endsWith('@c.us')) {
+            return chatId + '@c.us';
+        }
+        return chatId;
+    }
+
+    async function getSettings() {
+        const idInstance = document.getElementById('idInstance').value;
+        const apiTokenInstance = document.getElementById('apiTokenInstance').value;
+        const url = `${apiUrl}/waInstance${idInstance}/getSettings/${apiTokenInstance}`;
+
+        try {
+            const response = await fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } });
+            const data = await response.json();
+            displayResponse(data);
+        } catch (error) {
+            displayResponse({ error: error.message });
+        }
+    }
+
+    async function getStateInstance() {
+        const idInstance = document.getElementById('idInstance').value;
+        const apiTokenInstance = document.getElementById('apiTokenInstance').value;
+        const url = `${apiUrl}/waInstance${idInstance}/getStateInstance/${apiTokenInstance}`;
+
+        try {
+            const response = await fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } });
+            const data = await response.json();
+            displayResponse(data);
+        } catch (error) {
+            displayResponse({ error: error.message });
+        }
+    }
+
+    async function sendMessage() {
+        const idInstance = document.getElementById('idInstance').value;
+        const apiTokenInstance = document.getElementById('apiTokenInstance').value;
+
+
+        let chatId = document.getElementById('chatIdMessage').value;
+        chatId = formatChatId(chatId);
+
+        const message = document.getElementById('message').value;
+        const url = `${apiUrl}/waInstance${idInstance}/sendMessage/${apiTokenInstance}`;
+
+        const data = { chatId, message };
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            const result = await response.json();
+            displayResponse(result);
+        } catch (error) {
+            displayResponse({ error: error.message });
+        }
+    }
+
+    async function sendFileByUrl() {
+        const idInstance = document.getElementById('idInstance').value;
+        const apiTokenInstance = document.getElementById('apiTokenInstance').value;
+
+
+        let chatId = document.getElementById('chatIdFile').value;
+        chatId = formatChatId(chatId);
+
+        const fileUrl = document.getElementById('fileUrl').value;
+        const fileName = "1"; 
+        const caption = "1";
+
+        const url = `${apiUrl}/waInstance${idInstance}/sendFileByUrl/${apiTokenInstance}`;
+        const data = {
+            chatId,
+            urlFile: fileUrl,
+            fileName,
+            caption
+        };
+
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data),
+            });
+            const result = await response.json();
+            displayResponse(result);
+        } catch (error) {
+            displayResponse({ error: error.message });
+        }
+    }
+
+    function displayResponse(data) {
+        const output = document.getElementById('responseOutput');
+        output.value = JSON.stringify(data, null, 2);
+    }
+</script>
+
+</body>
+</html>
